@@ -36,11 +36,19 @@
         themeToggle: document.getElementById('theme-toggle'),
         themeIcon: document.getElementById('theme-icon'),
         themeLabel: document.getElementById('theme-label'),
+        shareButton: document.getElementById('open-share'),
+        shareDialog: document.getElementById('share-dialog'),
+        shareClose: document.getElementById('close-share'),
+        shareQr: document.getElementById('share-qr'),
+        shareLink: document.getElementById('share-link'),
+        copyShareLink: document.getElementById('copy-share-link'),
+        shareStatus: document.getElementById('share-status'),
     };
 
     const supportedRates = new Set(['0.5', '0.75', '1', '1.25', '1.5', '1.75', '2', '2.5', '3']);
     const maxFileSize = 50 * 1024 * 1024;
     const maxChunkLength = 220;
+    const publicAppUrl = 'https://thebrokenenglishguy-dotcom.github.io/book-reader-app/';
     const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
     let voices = [];
     let paragraphs = [];
@@ -641,6 +649,52 @@
         const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
         updateTheme(theme);
         remember('readwell-theme', theme);
+    });
+    elements.shareButton.addEventListener('click', () => {
+        elements.shareLink.value = publicAppUrl;
+        elements.shareStatus.textContent = '';
+        elements.shareQr.replaceChildren();
+        try {
+            if (typeof window.QRCode !== 'function') {
+                throw new Error('The QR code could not be loaded. You can still copy the link below.');
+            }
+            new window.QRCode(elements.shareQr, {
+                text: publicAppUrl,
+                width: 192,
+                height: 192,
+                colorDark: '#26352e',
+                colorLight: '#ffffff',
+                correctLevel: window.QRCode.CorrectLevel.M,
+            });
+        } catch (error) {
+            elements.shareStatus.textContent = error.message || 'The QR code could not be created. Copy the link below instead.';
+        }
+        elements.shareDialog.showModal();
+    });
+    elements.shareClose.addEventListener('click', () => elements.shareDialog.close());
+    elements.shareDialog.addEventListener('click', (event) => {
+        if (event.target === elements.shareDialog) elements.shareDialog.close();
+    });
+    elements.copyShareLink.addEventListener('click', async () => {
+        elements.shareLink.select();
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(elements.shareLink.value);
+                } catch (_error) {
+                    if (!document.execCommand('copy')) {
+                        throw new Error('Copy was blocked. Select the link and copy it manually.');
+                    }
+                }
+            } else if (!document.execCommand('copy')) {
+                throw new Error('Copy was blocked. Select the link and copy it manually.');
+            }
+            elements.shareStatus.textContent = 'Link copied. Share it with anyone you like.';
+        } catch (error) {
+            elements.shareStatus.textContent = error instanceof Error
+                ? error.message
+                : 'Copy was blocked. Select the link and copy it manually.';
+        }
     });
     document.getElementById('open-upload').addEventListener('click', () => elements.fileInput.click());
     elements.dropZone.addEventListener('click', () => elements.fileInput.click());

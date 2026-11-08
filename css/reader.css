@@ -187,6 +187,50 @@ button { color: inherit; }
 .language-pill span { color: var(--accent); font-size: 9px; }
 .avatar { display: grid; width: 29px; height: 29px; place-items: center; border-radius: 50%; background: var(--accent-soft); color: var(--accent-dark); font-family: "DM Serif Display", Georgia, serif; }
 
+.share-button, .share-copy {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--panel);
+    color: var(--accent-dark);
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.share-button:hover, .share-copy:hover { background: var(--accent-soft); }
+.share-button > span { font-size: 14px; }
+
+.share-dialog {
+    width: min(390px, calc(100% - 32px));
+    padding: 23px;
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    background: var(--panel);
+    color: var(--ink);
+    box-shadow: 0 20px 70px rgb(0 0 0 / 20%);
+}
+
+.share-dialog::backdrop { background: rgb(18 28 22 / 48%); backdrop-filter: blur(2px); }
+.share-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.share-dialog-header .eyebrow { margin-bottom: 5px; }
+.share-dialog-header h2 { margin-bottom: 0; font-family: "DM Serif Display", Georgia, serif; font-size: 23px; font-weight: 400; }
+.share-close { width: 30px; height: 30px; border: 0; border-radius: 50%; background: var(--panel-soft); color: var(--muted); cursor: pointer; font-size: 21px; line-height: 1; }
+.share-description { margin: 13px 0 16px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.share-qr { display: grid; width: 208px; height: 208px; margin: 0 auto 17px; place-items: center; border: 1px solid var(--line); border-radius: 9px; background: #fff; }
+.share-qr img, .share-qr canvas { display: block; max-width: 192px; max-height: 192px; }
+.share-link-row { display: flex; gap: 8px; }
+.share-link-row input { width: 100%; min-width: 0; padding: 0 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-soft); color: var(--ink); font: inherit; font-size: 10px; }
+.share-copy { flex: 0 0 auto; border-color: var(--accent); background: var(--accent); color: #fff; }
+.share-copy:hover { background: var(--accent-dark); color: var(--panel); }
+.share-status { min-height: 14px; margin: 9px 0 0; color: var(--accent-dark); font-size: 10px; text-align: center; }
+.share-privacy { margin: 7px 0 0; color: var(--muted); font-size: 9px; text-align: center; }
+
 .page-heading {
     position: relative;
     display: flex;
@@ -342,6 +386,7 @@ h2 { margin: 5px 0 0; font-family: "DM Serif Display", Georgia, serif; font-size
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
 
 button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.share-link-row input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 @media (min-width: 1500px) {
     .main-content { margin-right: auto; padding-right: 70px; padding-left: 70px; }
@@ -380,7 +425,8 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid
     .main-content { padding-right: 15px; padding-left: 15px; }
     .sidebar { padding-right: 15px; padding-left: 15px; }
     .breadcrumb > span:first-child { display: none; }
-    .topbar-right { gap: 8px; }
+    .topbar-right { gap: 6px; }
+    .share-button { min-height: 31px; gap: 4px; padding: 0 8px; font-size: 9px; }
     .page-heading { min-height: 126px; }
     .heading-decoration { right: 1%; font-size: 145px; }
     .page-subtitle { max-width: 275px; font-size: 11px; line-height: 1.6; }

@@ -14,7 +14,8 @@
     <script defer src="https://unpkg.com/mammoth@1.9.0/mammoth.browser.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-    <script defer src="./js/reader.js?v=5"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script defer src="./js/reader.js?v=6"></script>
 </head>
 <body>
     <div class="app-shell">
@@ -50,6 +51,9 @@
                 <div class="breadcrumb"><span>YOUR LIBRARY</span><span class="breadcrumb-divider">/</span><strong>Reader</strong></div>
                 <div class="topbar-right">
                     <span class="language-pill"><span aria-hidden="true">◉</span> English</span>
+                    <button class="share-button" id="open-share" type="button" aria-haspopup="dialog" aria-controls="share-dialog">
+                        <span aria-hidden="true">↗</span> Share app
+                    </button>
                     <span class="avatar" aria-hidden="true">R</span>
                 </div>
             </header>
@@ -175,5 +179,23 @@
             <footer class="page-footer"><span>MADE FOR THE LOVE OF A GOOD STORY</span><span>English only · Powered by your browser</span></footer>
         </main>
     </div>
+    <dialog class="share-dialog" id="share-dialog" aria-labelledby="share-title">
+        <div class="share-dialog-header">
+            <div>
+                <p class="eyebrow">PASS IT ALONG</p>
+                <h2 id="share-title">Share the reader</h2>
+            </div>
+            <button class="share-close" type="button" aria-label="Close sharing dialog" id="close-share">×</button>
+        </div>
+        <p class="share-description">Anyone with this link can open the book reader on their device.</p>
+        <div class="share-qr" id="share-qr" role="img" aria-label="QR code linking to the book reader"></div>
+        <label class="sr-only" for="share-link">Book reader link</label>
+        <div class="share-link-row">
+            <input id="share-link" type="url" readonly>
+            <button class="share-copy" id="copy-share-link" type="button">Copy link</button>
+        </div>
+        <p class="share-status" id="share-status" role="status" aria-live="polite"></p>
+        <p class="share-privacy">Your books and text are not included in the link.</p>
+    </dialog>
 </body>
 </html>
