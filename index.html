@@ -173,6 +173,30 @@
                             </select>
                         </label>
                     </div>
+                    <div class="music-panel" aria-labelledby="music-title">
+                        <div class="music-heading">
+                            <div><span class="section-kicker">03 — BACKGROUND MUSIC</span><h3 id="music-title">Add a little music</h3></div>
+                            <span class="music-note">YouTube</span>
+                        </div>
+                        <div class="music-url-row">
+                            <label class="sr-only" for="music-url">YouTube music link</label>
+                            <input id="music-url" type="url" inputmode="url" placeholder="Paste a YouTube music link" autocomplete="url">
+                            <button id="load-music" type="button">Load</button>
+                        </div>
+                        <div class="music-player-frame" id="music-player-frame"><div id="youtube-player" title="YouTube background music player"></div></div>
+                        <div class="music-controls">
+                            <div class="music-buttons">
+                                <button class="music-control-button" id="music-play" type="button" disabled>Play music</button>
+                                <button class="music-control-button" id="music-pause" type="button" disabled>Pause</button>
+                                <button class="music-control-button" id="music-stop" type="button" disabled>Stop</button>
+                            </div>
+                            <label class="volume-control" for="music-volume">
+                                <span>Music volume <strong id="music-volume-value">25%</strong></span>
+                                <input id="music-volume" type="range" min="0" max="100" value="25" step="1">
+                            </label>
+                        </div>
+                        <p class="music-status" id="music-status" role="status" aria-live="polite">Paste a YouTube link to add background music.</p>
+                    </div>
                     <p class="playback-message" id="playback-message" role="status" aria-live="polite"></p>
                 </section>
             </div>
