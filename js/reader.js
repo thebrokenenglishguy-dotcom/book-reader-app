@@ -43,6 +43,14 @@
         shareLink: document.getElementById('share-link'),
         copyShareLink: document.getElementById('copy-share-link'),
         shareStatus: document.getElementById('share-status'),
+        musicUrl: document.getElementById('music-url'),
+        loadMusic: document.getElementById('load-music'),
+        musicPlay: document.getElementById('music-play'),
+        musicPause: document.getElementById('music-pause'),
+        musicStop: document.getElementById('music-stop'),
+        musicVolume: document.getElementById('music-volume'),
+        musicVolumeValue: document.getElementById('music-volume-value'),
+        musicStatus: document.getElementById('music-status'),
     };
 
     const supportedRates = new Set(['0.5', '0.75', '1', '1.25', '1.5', '1.75', '2', '2.5', '3']);
@@ -64,6 +72,113 @@
     let sessionVersion = 0;
     let wordCountTimer = 0;
     let lastBoundaryWordCount = 0;
+
+    let youtubePlayer = null;
+    let youtubeApiReady = false;
+    let youtubeApiLoading = false;
+    let pendingVideoId = null;
+
+    function setMusicStatus(message, isError) {
+        elements.musicStatus.textContent = message;
+        elements.musicStatus.classList.toggle('error', Boolean(isError));
+    }
+
+    function getYouTubeVideoId(input) {
+        try {
+            const url = new URL(input.trim());
+            const host = url.hostname.replace(/^www\\./, '').toLowerCase();
+            if (host === 'youtu.be') return url.pathname.split('/').filter(Boolean)[0] || null;
+            if (['youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtube-nocookie.com'].includes(host)) {
+                if (url.searchParams.get('v')) return url.searchParams.get('v');
+                const parts = url.pathname.split('/').filter(Boolean);
+                if (['embed', 'shorts', 'live'].includes(parts[0])) return parts[1] || null;
+            }
+        } catch (_error) { return null; }
+        return null;
+    }
+
+    function setMusicControlsEnabled(enabled) {
+        elements.musicPlay.disabled = !enabled;
+        elements.musicPause.disabled = !enabled;
+        elements.musicStop.disabled = !enabled;
+    }
+
+    function loadYouTubeApi() {
+        if (window.YT && window.YT.Player) {
+            youtubeApiReady = true;
+            createYouTubePlayer();
+            return;
+        }
+        if (youtubeApiLoading) return;
+        youtubeApiLoading = true;
+        const previousCallback = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = () => {
+            if (typeof previousCallback === 'function') previousCallback();
+            youtubeApiReady = true;
+            createYouTubePlayer();
+        };
+        const script = document.createElement('script');
+        script.src = 'https://www.youtube.com/iframe_api';
+        script.async = true;
+        script.onerror = () => {
+            youtubeApiLoading = false;
+            setMusicStatus('The YouTube player could not load. Check your internet connection and try again.', true);
+        };
+        document.head.append(script);
+    }
+
+    function createYouTubePlayer() {
+        if (!youtubeApiReady || !pendingVideoId || youtubePlayer) return;
+        const videoId = pendingVideoId;
+        pendingVideoId = null;
+        youtubePlayer = new window.YT.Player('youtube-player', {
+            videoId,
+            playerVars: { controls: 1, playsinline: 1, rel: 0, origin: window.location.origin },
+            events: {
+                onReady: (event) => {
+                    event.target.setVolume(Number(elements.musicVolume.value));
+                    setMusicControlsEnabled(true);
+                    setMusicStatus('Music is ready. Press Play music when you want to listen.', false);
+                },
+                onError: (event) => {
+                    const messages = {
+                        2: 'That YouTube link is not valid. Check the URL and try again.',
+                        5: 'This video cannot be played in the HTML5 player.',
+                        100: 'This video was not found or is private.',
+                        101: 'The owner does not allow this video to play on other websites.',
+                        150: 'The owner does not allow this video to play on other websites.'
+                    };
+                    setMusicStatus(messages[event.data] || 'YouTube could not play this video. Try another link.', true);
+                    setMusicControlsEnabled(false);
+                },
+                onStateChange: (event) => {
+                    if (event.data === window.YT.PlayerState.PLAYING) setMusicStatus('Background music is playing.', false);
+                    else if (event.data === window.YT.PlayerState.PAUSED) setMusicStatus('Background music is paused.', false);
+                    else if (event.data === window.YT.PlayerState.ENDED) setMusicStatus('The music has ended.', false);
+                }
+            }
+        });
+    }
+
+    function loadBackgroundMusic() {
+        const videoId = getYouTubeVideoId(elements.musicUrl.value);
+        if (!videoId || !/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
+            setMusicStatus('Please paste a valid YouTube video link.', true);
+            return;
+        }
+        remember('readwell-music-url', elements.musicUrl.value.trim());
+        setMusicControlsEnabled(false);
+        if (youtubePlayer && typeof youtubePlayer.cueVideoById === 'function') {
+            youtubePlayer.cueVideoById(videoId);
+            youtubePlayer.setVolume(Number(elements.musicVolume.value));
+            setMusicControlsEnabled(true);
+            setMusicStatus('Music loaded. Press Play music to start.', false);
+            return;
+        }
+        pendingVideoId = videoId;
+        setMusicStatus('Loading the YouTube player…', false);
+        loadYouTubeApi();
+    }
 
     function countWords(text) {
         let count = 0;
@@ -579,6 +694,21 @@
         showMessage('', false);
     });
 
+    elements.loadMusic.addEventListener('click', loadBackgroundMusic);
+    elements.musicUrl.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') loadBackgroundMusic();
+    });
+    elements.musicPlay.addEventListener('click', () => { if (youtubePlayer) youtubePlayer.playVideo(); });
+    elements.musicPause.addEventListener('click', () => { if (youtubePlayer) youtubePlayer.pauseVideo(); });
+    elements.musicStop.addEventListener('click', () => {
+        if (youtubePlayer) { youtubePlayer.stopVideo(); setMusicStatus('Background music stopped.', false); }
+    });
+    elements.musicVolume.addEventListener('input', () => {
+        const volume = Number(elements.musicVolume.value);
+        elements.musicVolumeValue.textContent = `${volume}%`;
+        remember('readwell-music-volume', String(volume));
+        if (youtubePlayer) youtubePlayer.setVolume(volume);
+    });
     elements.start.addEventListener('click', () => startAtParagraph(0, 0));
     elements.play.addEventListener('click', () => {
         if (isPaused) {
@@ -712,6 +842,15 @@
         });
     }
     elements.dropZone.addEventListener('drop', (event) => extractFile(event.dataTransfer.files[0]));
+
+    const savedMusicVolume = readPreference('readwell-music-volume');
+    if (savedMusicVolume !== null && /^\\d+$/.test(savedMusicVolume)) {
+        const volume = Math.max(0, Math.min(100, Number(savedMusicVolume)));
+        elements.musicVolume.value = String(volume);
+        elements.musicVolumeValue.textContent = `${volume}%`;
+    }
+    const savedMusicUrl = readPreference('readwell-music-url');
+    if (savedMusicUrl) elements.musicUrl.value = savedMusicUrl;
 
     const savedSpeed = readPreference('readwell-speed');
     if (savedSpeed && supportedRates.has(savedSpeed)) elements.speed.value = savedSpeed;
