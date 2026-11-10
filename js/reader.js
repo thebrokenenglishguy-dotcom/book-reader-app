@@ -51,6 +51,8 @@
         musicVolume: document.getElementById('music-volume'),
         musicVolumeValue: document.getElementById('music-volume-value'),
         musicStatus: document.getElementById('music-status'),
+        narrationVolume: document.getElementById('narration-volume'),
+        narrationVolumeValue: document.getElementById('narration-volume-value'),
     };
 
     const supportedRates = new Set(['0.5', '0.75', '1', '1.25', '1.5', '1.75', '2', '2.5', '3']);
@@ -379,6 +381,7 @@
         const utterance = new SpeechSynthesisUtterance(chunk.slice(utteranceStart));
         utterance.lang = 'en-US';
         utterance.rate = Number(elements.speed.value);
+        utterance.volume = Number(elements.narrationVolume.value) / 100;
         const voice = selectedVoice();
         if (voice) {
             utterance.voice = voice;
@@ -710,6 +713,16 @@
     elements.musicStop.addEventListener('click', () => {
         if (youtubePlayer) { youtubePlayer.stopVideo(); setMusicStatus('Background music stopped.', false); }
     });
+    elements.narrationVolume.addEventListener('input', () => {
+        const volume = Number(elements.narrationVolume.value);
+        elements.narrationVolumeValue.textContent = `${volume}%`;
+        remember('readwell-narration-volume', String(volume));
+        if (isReading && synth) {
+            sessionVersion += 1;
+            synth.cancel();
+            speakCurrentChunk();
+        }
+    });
     elements.musicVolume.addEventListener('input', () => {
         const volume = Number(elements.musicVolume.value);
         elements.musicVolumeValue.textContent = `${volume}%`;
@@ -850,6 +863,12 @@
     }
     elements.dropZone.addEventListener('drop', (event) => extractFile(event.dataTransfer.files[0]));
 
+    const savedNarrationVolume = readPreference('readwell-narration-volume');
+    if (savedNarrationVolume !== null && Number.isInteger(Number(savedNarrationVolume))) {
+        const volume = Math.max(0, Math.min(100, Number(savedNarrationVolume)));
+        elements.narrationVolume.value = String(volume);
+        elements.narrationVolumeValue.textContent = `${volume}%`;
+    }
     const savedMusicVolume = readPreference('readwell-music-volume');
     if (savedMusicVolume !== null && Number.isInteger(Number(savedMusicVolume))) {
         const volume = Math.max(0, Math.min(100, Number(savedMusicVolume)));
