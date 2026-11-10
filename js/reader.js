@@ -87,7 +87,8 @@
     function getYouTubeVideoId(input) {
         try {
             const url = new URL(input.trim());
-            const host = url.hostname.replace(/^www\\./, '').toLowerCase();
+            const hostname = url.hostname.toLowerCase();
+            const host = hostname.startsWith('www.') ? hostname.slice(4) : hostname;
             if (host === 'youtu.be') return url.pathname.split('/').filter(Boolean)[0] || null;
             if (['youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtube-nocookie.com'].includes(host)) {
                 if (url.searchParams.get('v')) return url.searchParams.get('v');
@@ -850,7 +851,7 @@
     elements.dropZone.addEventListener('drop', (event) => extractFile(event.dataTransfer.files[0]));
 
     const savedMusicVolume = readPreference('readwell-music-volume');
-    if (savedMusicVolume !== null && /^\\d+$/.test(savedMusicVolume)) {
+    if (savedMusicVolume !== null && Number.isInteger(Number(savedMusicVolume))) {
         const volume = Math.max(0, Math.min(100, Number(savedMusicVolume)));
         elements.musicVolume.value = String(volume);
         elements.musicVolumeValue.textContent = `${volume}%`;
