@@ -461,7 +461,7 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid
 .music-url-row button:hover { background: var(--accent-dark); }
 .music-player-frame { width: 100%; margin-top: 11px; overflow: hidden; border-radius: 7px; background: #111; aspect-ratio: 16 / 9; }
 #youtube-player, .music-player-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
-.music-controls { display: grid; grid-template-columns: auto minmax(120px, 1fr); align-items: center; gap: 15px; margin-top: 12px; }
+.music-controls { display: grid; grid-template-columns: auto repeat(2, minmax(110px, 1fr)); align-items: center; gap: 15px; margin-top: 12px; }
 .music-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
 .music-control-button { min-height: 30px; padding: 0 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); cursor: pointer; font-size: 9px; }
 .music-control-button:hover:not(:disabled) { border-color: var(--accent-light); color: var(--accent-dark); }
