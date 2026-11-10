@@ -74,6 +74,7 @@
     let lastBoundaryWordCount = 0;
 
     let youtubePlayer = null;
+    let youtubePlayerReady = false;
     let youtubeApiReady = false;
     let youtubeApiLoading = false;
     let pendingVideoId = null;
@@ -136,7 +137,12 @@
             playerVars: { controls: 1, playsinline: 1, rel: 0, origin: window.location.origin },
             events: {
                 onReady: (event) => {
+                    youtubePlayerReady = true;
                     event.target.setVolume(Number(elements.musicVolume.value));
+                    if (pendingVideoId) {
+                        event.target.cueVideoById(pendingVideoId);
+                        pendingVideoId = null;
+                    }
                     setMusicControlsEnabled(true);
                     setMusicStatus('Music is ready. Press Play music when you want to listen.', false);
                 },
@@ -168,7 +174,7 @@
         }
         remember('readwell-music-url', elements.musicUrl.value.trim());
         setMusicControlsEnabled(false);
-        if (youtubePlayer && typeof youtubePlayer.cueVideoById === 'function') {
+        if (youtubePlayer && youtubePlayerReady) {
             youtubePlayer.cueVideoById(videoId);
             youtubePlayer.setVolume(Number(elements.musicVolume.value));
             setMusicControlsEnabled(true);
